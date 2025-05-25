@@ -3,15 +3,14 @@ import { StatusBar } from 'expo-status-bar';
 import { Provider } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { NativeBaseProvider } from 'native-base';
+import { PaperProvider } from 'react-native-paper';
 import * as SplashScreen from 'expo-splash-screen';
 import { LogBox } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Import screens
 import LoginScreen from './src/screens/auth/LoginScreen';
-import HomeScreen from './src/screens/home/HomeScreen';
 import BookingScreen from './src/screens/booking/BookingScreen';
-import ProfileScreen from './src/screens/profile/ProfileScreen';
 import RatingScreen from './src/screens/rating/RatingScreen';
 
 // Import navigation
@@ -21,12 +20,14 @@ import BottomTabNavigator from './src/navigation/BottomTabNavigator';
 import { store } from './src/store';
 
 // Import theme
-import { theme } from './src/constants/theme';
+import { paperTheme } from './src/constants/theme';
 
 // Ignore specific warnings
 LogBox.ignoreLogs([
   'Warning: componentWillReceiveProps',
   'Warning: componentWillMount',
+  'Non-serializable values were found in the navigation state',
+  'AsyncStorage has been extracted from react-native',
 ]);
 
 const Stack = createStackNavigator();
@@ -54,23 +55,52 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      <NativeBaseProvider theme={theme}>
-        <NavigationContainer>
-          <StatusBar style="light" backgroundColor="#4CAF50" />
-          <Stack.Navigator
-            initialRouteName="Login"
-            screenOptions={{
-              headerShown: false,
-              cardStyle: { backgroundColor: '#ffffff' },
-            }}
-          >
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Main" component={BottomTabNavigator} />
-            <Stack.Screen name="Booking" component={BookingScreen} />
-            <Stack.Screen name="Rating" component={RatingScreen} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </NativeBaseProvider>
+      <SafeAreaProvider>
+        <PaperProvider theme={paperTheme}>
+          <NavigationContainer>
+            <StatusBar style="light" backgroundColor="#4CAF50" />
+            <Stack.Navigator
+              initialRouteName="Login"
+              screenOptions={{
+                headerShown: false,
+                cardStyle: { backgroundColor: '#ffffff' },
+                gestureEnabled: true,
+                gestureDirection: 'horizontal',
+              }}
+            >
+              <Stack.Screen 
+                name="Login" 
+                component={LoginScreen}
+                options={{
+                  gestureEnabled: false,
+                }}
+              />
+              <Stack.Screen 
+                name="Main" 
+                component={BottomTabNavigator}
+                options={{
+                  gestureEnabled: false,
+                }}
+              />
+              <Stack.Screen 
+                name="Booking" 
+                component={BookingScreen}
+                options={{
+                  presentation: 'modal',
+                  gestureEnabled: true,
+                }}
+              />
+              <Stack.Screen 
+                name="Rating" 
+                component={RatingScreen}
+                options={{
+                  presentation: 'card',
+                }}
+              />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </PaperProvider>
+      </SafeAreaProvider>
     </Provider>
   );
 }
